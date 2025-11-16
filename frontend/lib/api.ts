@@ -1,4 +1,4 @@
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:9000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:9000';
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');

@@ -74,7 +74,7 @@ export default function Register() {
               required
             >
               <option value="customer">Customer</option>
-              <option value="admin">Admin</option>
+              
             </select>
           </div>
 
