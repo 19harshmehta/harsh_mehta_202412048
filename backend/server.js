@@ -1,28 +1,41 @@
 require('dotenv').config();
 const express = require('express');
-const { PrismaClient } = require('./generated/mongo');
+const { PrismaClient } = require('./generated/mongo'); // This import is now working!
 const app = express();
 app.use(express.json());
 const cors = require('cors');
 
+const frontendUrl = process.env.FRONTEND_URL;
+
+const deployedFrontendUrl = 'https://ecommarce-test-app-frontend.vercel.app';
 
 const allowedOrigins = [
-    'http://localhost:3000',
-    process.env.FRONTEND_URL  // This will be your deployed Vercel URL
+  'http://localhost:3000',
+  frontendUrl,
+  deployedFrontendUrl 
 ];
-app.use(cors({
-    origin: (origin, callback) => {
-        
-        if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-    credentials: true
-}));
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      const msg = `CORS ERROR: Origin ${origin} is not in the allowed list.`;
+      console.error(msg); // Log the error to Vercel
+      callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+  allowedHeaders: ['Content-Type', 'Authorization'] 
+};
+
+app.options('*', cors(corsOptions));
+
+app.use(cors(corsOptions));
+
 
 const prisma_mongo = new PrismaClient();
 async function testMongoConnection() {
@@ -40,10 +53,10 @@ testMongoConnection().then(() => {
   const productRoutes = require('./routes/product');
   const orderRoutes = require('./routes/order');
 
-
   app.use('/api/auth', authRoutes);
   app.use('/api/products', productRoutes);
   app.use('/api/orders', orderRoutes);
+  
   app.get("/health", (req, res) => {
     res.status(200).json({
       status: "ok",
