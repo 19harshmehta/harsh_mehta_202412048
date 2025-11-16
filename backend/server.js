@@ -22,10 +22,18 @@ testMongoConnection().then(() => {
   const productRoutes = require('./routes/product');
   const orderRoutes = require('./routes/order');
 
-  
+
   app.use('/api/auth', authRoutes);
   app.use('/api/products', productRoutes);
   app.use('/api/orders', orderRoutes);
+  app.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "ok",
+      message: "Server is running",
+      timestamp: new Date().toISOString()
+    });
+  });
+
   const PORT = process.env.PORT || 9000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
